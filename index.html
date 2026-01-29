@@ -348,8 +348,10 @@
             }
         };
 
-        // API 地址 (部署时改成你的服务器地址)
-        const API_URL = '/api/data';
+        // API 地址 - 改成你的服务器地址和端口
+        const API_URL = window.location.hostname === 'localhost' || window.location.protocol === 'file:' 
+            ? 'http://www.2dolist.top:3000/api/data'  // 本地访问时用服务器地址
+            : '/api/data';  // 通过服务器访问时用相对路径
         
         let state = {
             todos: [],
