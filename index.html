@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DreamQuest Mobile | 移动版待办</title>
+    <!-- 引入字体和图标 -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- 核心库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #ec4899;
+            --accent: #06b6d4;
+            --gold: #f59e0b;
+            --danger: #ef4444;
+            --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --text-main: #374151;
+            --text-light: #6b7280;
+            --radius: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nunito', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            min-height: 100vh;
+            /* 使用 dvh 解决移动端浏览器地址栏遮挡问题 */
+            height: 100dvh; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-gradient);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 动态背景 */
+        .aurora-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(236, 72, 153, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.25) 0%, transparent 40%);
+            filter: blur(40px);
+            animation: pulse 8s infinite alternate;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        /* 主容器 */
+        .app-container {
+            width: 90%; max-width: 1100px; height: 90vh;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            display: flex; overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* --- 左侧面板 (Sidebar) --- */
+        .sidebar {
+            width: 280px; padding: 30px;
+            background: rgba(255,255,255,0.4);
+            border-right: 1px solid rgba(255,255,255,0.4);
+            display: flex; flex-direction: column; gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .profile-section { text-align: center; margin-bottom: 10px; }
+        .avatar { font-size: 60px; cursor: pointer; transition: 0.3s; display: inline-block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        .avatar:hover { transform: scale(1.1) rotate(10deg); }
+        .user-name { font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 5px; }
+        .level-pill {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+            display: inline-block; margin-top: 5px;
+        }
+
+        /* 经验条区域 */
+        .xp-box { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .xp-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-light); margin-bottom: 8px; font-weight: 700; }
+        .xp-track { height: 8px; background: #f3f4f6; border-radius: 5px; overflow: hidden; }
+        .xp-fill { 
+            height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); 
+            border-radius: 5px; transition: width 0.6s ease;
+        }
+
+        /* --- 右侧主内容 --- */
+        .main-content { flex: 1; padding: 30px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+        /* 顶部导航 Tabs */
+        .nav-tabs {
+            display: flex; gap: 10px; margin-bottom: 20px;
+            background: rgba(255,255,255,0.5); padding: 5px; border-radius: 16px; 
+            width: fit-content; align-self: flex-start;
+        }
+        .nav-tab {
+            padding: 10px 20px; border-radius: 12px; cursor: pointer;
+            font-size: 14px; font-weight: 700; color: var(--text-light);
+            transition: 0.3s; display: flex; align-items: center; gap: 6px; white-space: nowrap;
+        }
+        .nav-tab.active { background: white; color: var(--primary); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15); }
+
+        /* 输入区域 */
+        .input-wrapper {
+            background: white; border-radius: 20px; padding: 10px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-bottom: 20px;
+            border: 2px solid transparent; transition: 0.3s;
+        }
+        .input-wrapper:focus-within { border-color: var(--primary); }
+        
+        .type-select, .date-picker {
+            border: none; background: #f3f4f6; padding: 10px; border-radius: 12px;
+            font-size: 13px; color: var(--text-main); font-weight: 700; outline: none; flex-shrink: 0;
+        }
+        .main-input { flex: 1; border: none; outline: none; font-size: 16px; font-weight: 600; color: var(--text-main); min-width: 100px; }
+        
+        .add-btn {
+            width: 44px; height: 44px; border-radius: 14px; background: var(--primary); color: white;
+            border: none; font-size: 22px; cursor: pointer; transition: 0.2s; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .add-btn:active { transform: scale(0.95); }
+
+        /* 列表容器 */
+        .task-list-container { flex: 1; overflow-y: auto; padding: 2px; -webkit-overflow-scrolling: touch; }
+        .task-list-container::-webkit-scrollbar { width: 4px; }
+        .task-list-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        
+        /* 任务卡片 */
+        .task-item {
+            background: rgba(255,255,255,0.9); margin-bottom: 12px; padding: 16px; border-radius: 16px;
+            display: flex; align-items: center; gap: 12px; position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: all 0.2s;
+            border-left: 4px solid transparent; animation: slideIn 0.3s ease;
+        }
+        .task-item.type-longterm { border-left-color: var(--gold); background: linear-gradient(to right, #fffbf0, #fff); }
+        .task-item.type-daily { border-left-color: var(--primary); }
+        
+        .task-item.completed { opacity: 0.7; filter: grayscale(1); }
+        .task-item.completed .task-text { text-decoration: line-through; color: var(--text-light); }
+
+        .check-circle {
+            width: 28px; height: 28px; border-radius: 50%; border: 2px solid #d1d5db;
+            flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.3s;
+        }
+        .task-item.completed .check-circle { background: #10b981; border-color: #10b981; }
+        .check-circle i { color: white; font-size: 16px; opacity: 0; transform: scale(0); transition: 0.2s; }
+        .task-item.completed .check-circle i { opacity: 1; transform: scale(1); }
+
+        .task-content { flex: 1; overflow: hidden; }
+        .task-text { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+        
+        .meta-tags { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .date-badge { font-size: 11px; color: var(--text-light); background: #f3f4f6; padding: 3px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+        .date-badge.overdue { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+        .xp-badge { font-size: 10px; color: var(--primary); font-weight: 800; background: rgba(139, 92, 246, 0.1); padding: 2px 6px; border-radius: 4px; }
+
+        .delete-btn {
+            color: #ef4444; background: rgba(239, 68, 68, 0.1); width: 34px; height: 34px; border-radius: 10px; border:none; 
+            cursor: pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;
+        }
+
+        .empty-state { text-align: center; margin-top: 60px; color: var(--text-light); display: none; }
+        .empty-state i { font-size: 48px; opacity: 0.3; margin-bottom: 10px; display: block; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ================= 移动端适配核心代码 ================= */
+        @media (max-width: 768px) {
+            body { 
+                align-items: flex-start; /* 顶部对齐 */
+                background: #f3f4f6; /* 移动端背景纯色化以减少性能消耗，或保留渐变 */
+                background: var(--bg-gradient);
+            }
+            
+            .app-container {
+                width: 100%; height: 100dvh; 
+                border-radius: 0; 
+                flex-direction: column; /* 上下布局 */
+                border: none;
+            }
+
+            /* 头部变身 */
+            .sidebar {
+                width: 100%; height: auto;
+                flex-direction: row; 
+                align-items: center;
+                justify-content: space-between;
+                padding: 15px 20px;
+                background: rgba(255,255,255,0.6);
+                border-right: none;
+                border-bottom: 1px solid rgba(255,255,255,0.5);
+                gap: 10px;
+            }
+
+            .profile-section { 
+                margin-bottom: 0; 
+                text-align: left; 
+                display: flex; 
+                align-items: center; 
+                gap: 10px; 
+            }
+            .avatar { font-size: 40px; margin: 0; }
+            .user-name { font-size: 16px; margin: 0; }
+            .level-pill { margin: 0; font-size: 10px; padding: 2px 8px; }
+
+            /* 移动端 XP 条简化 */
+            .xp-box { 
+                padding: 0; box-shadow: none; background: transparent; 
+                width: 120px; 
+            }
+            .xp-info { display: none; } /* 隐藏文字，只留条 */
+            .xp-track { height: 6px; background: rgba(0,0,0,0.1); }
+            
+            /* 主内容调整 */
+            .main-content { padding: 15px; }
+            
+            .nav-tabs { 
+                width: 100%; 
+                justify-content: space-between; 
+                background: white;
+                margin-bottom: 15px;
+            }
+            .nav-tab { 
+                flex: 1; justify-content: center; padding: 12px 0; font-size: 13px; 
+            }
+
+            /* 输入框多行排列 */
+            .input-wrapper {
+                flex-wrap: wrap; /* 允许换行 */
+                gap: 8px;
+                padding: 12px;
+            }
+            .type-select { flex: 1; }
+            .date-picker { flex: 1; }
+            .main-input { 
+                width: 100%; /* 独占一行 */
+                order: 3; /* 放到下面 */
+                padding: 5px 0;
+            }
+            .add-btn { order: 4; margin-left: auto; }
+
+            /* 列表优化 */
+            .task-text { white-space: normal; /* 允许文字换行 */ }
+            
+            /* 始终显示删除按钮 (手机没悬停) */
+            .delete-btn { opacity: 1; background: transparent; color: #9ca3af; }
+            
+            .aurora-bg { display: none; /* 手机端去掉复杂背景动画省电 */ }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="aurora-bg"></div>
+
+    <div class="app-container">
+        
+        <!-- 侧边栏 / 顶部栏 -->
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="avatar" id="avatar" onclick="alert('继续加油！')">🌱</div>
+                <div>
+                    <div class="user-name">Dreamer</div>
+                    <span class="level-pill" id="level-display">LV.1 新手</span>
+                </div>
+            </div>
+
+            <div class="xp-box">
+                <div class="xp-info">
+                    <span>EXP</span>
+                    <span id="xp-text">0/100</span>
+                </div>
+                <div class="xp-track">
+                    <div class="xp-fill" id="xp-bar"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主界面 -->
+        <main class="main-content">
+            
+            <div class="nav-tabs">
+                <div class="nav-tab active" onclick="switchTab('daily')" id="tab-daily">
+                    <i class="ri-sun-line"></i> 日常
+                </div>
+                <div class="nav-tab" onclick="switchTab('longterm')" id="tab-longterm">
+                    <i class="ri-flag-2-line"></i> 目标
+                </div>
+                <div class="nav-tab" onclick="switchTab('history')" id="tab-history">
+                    <i class="ri-history-line"></i> 历史
+                </div>
+            </div>
+
+            <div class="input-wrapper" id="input-area">
+                <select class="type-select" id="task-type">
+                    <option value="daily">Daily</option>
+                    <option value="longterm">Epic</option>
+                </select>
+                <input type="date" class="date-picker" id="task-date">
+                <input type="text" class="main-input" id="todo-input" placeholder="添加新任务...">
+                <button class="add-btn" id="add-btn"><i class="ri-add-line"></i></button>
+            </div>
+
+            <div class="task-list-container">
+                <div id="todo-list"></div>
+                <div class="empty-state" id="empty-state">
+                    <i class="ri-inbox-line"></i>
+                    <p>暂无任务，享受当下</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- 逻辑部分保持不变，适配了触摸事件 ---
+        
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const playSound = (type) => {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const now = audioCtx.currentTime;
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if (type === 'add') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(600, now);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'complete') {
+                [523, 659, 783].forEach((f, i) => {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.type = 'triangle'; o.frequency.value = f;
+                    g.gain.value = 0.05; g.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.start(now + i*0.06); o.stop(now + 0.8);
+                });
+            }
+        };
+
+        // API 地址 (部署时改成你的服务器地址)
+        const API_URL = '/api/data';
+        
+        let state = {
+            todos: [],
+            xp: 0,
+            level: 1,
+            currentTab: 'daily'
+        };
+        
+        // 从服务器加载数据
+        async function loadData() {
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+                state.todos = data.todos || [];
+                state.xp = data.xp || 0;
+                state.level = data.level || 1;
+                render();
+                updateStats();
+            } catch (e) {
+                console.log('加载失败，使用本地数据');
+                state.todos = JSON.parse(localStorage.getItem('dq_mobile_todos')) || [];
+                state.xp = parseInt(localStorage.getItem('dq_mobile_xp')) || 0;
+                state.level = parseInt(localStorage.getItem('dq_mobile_level')) || 1;
+            }
+        }
+
+        const RANKS = ["新手", "见习", "冒险者", "精英", "大师", "传说"];
+        const XP_LIMIT = 100;
+
+        const dom = {
+            list: document.getElementById('todo-list'),
+            input: document.getElementById('todo-input'),
+            dateInput: document.getElementById('task-date'),
+            typeSelect: document.getElementById('task-type'),
+            addBtn: document.getElementById('add-btn'),
+            inputArea: document.getElementById('input-area'),
+            emptyState: document.getElementById('empty-state'),
+            xpBar: document.getElementById('xp-bar'),
+            xpText: document.getElementById('xp-text'),
+            levelDisplay: document.getElementById('level-display'),
+            avatar: document.getElementById('avatar')
+        };
+
+        function init() {
+            dom.dateInput.valueAsDate = new Date();
+            loadData(); // 从服务器加载数据
+            // 移动端也支持长按拖拽
+            new Sortable(dom.list, { 
+                animation: 200, 
+                delay: 200,
+                delayOnTouchOnly: true 
+            });
+        }
+
+        function switchTab(tab) {
+            state.currentTab = tab;
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            if (tab === 'history') {
+                dom.inputArea.style.display = 'none';
+            } else {
+                dom.inputArea.style.display = 'flex';
+                dom.typeSelect.value = tab; 
+            }
+            render();
+        }
+
+        function addTodo() {
+            const text = dom.input.value.trim();
+            if (!text) return;
+
+            const newTodo = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                type: dom.typeSelect.value,
+                dueDate: dom.dateInput.value,
+                completedDate: null,
+                xpReward: dom.typeSelect.value === 'longterm' ? 50 : 20
+            };
+
+            state.todos.unshift(newTodo);
+            save(); render(); playSound('add');
+            dom.input.value = '';
+            setAvatar('🧐', 1000);
+        }
+
+        function toggleTodo(id) {
+            const todo = state.todos.find(t => t.id === id);
+            if (!todo) return;
+            
+            todo.completed = !todo.completed;
+            if (todo.completed) {
+                todo.completedDate = new Date().toISOString().split('T')[0];
+                gainXp(todo.xpReward);
+                playSound('complete');
+                confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
+                setAvatar('🤩', 1500);
+            } else {
+                state.xp = Math.max(0, state.xp - todo.xpReward);
+                todo.completedDate = null;
+            }
+            save(); 
+            setTimeout(() => { render(); updateStats(); }, 250);
+        }
+
+        function deleteTodo(e, id) {
+            e.stopPropagation();
+            if(confirm('删除任务？')) {
+                state.todos = state.todos.filter(t => t.id !== id);
+                save(); render();
+            }
+        }
+
+        function render() {
+            dom.list.innerHTML = '';
+            const filtered = state.todos.filter(todo => {
+                if (state.currentTab === 'history') return todo.completed;
+                return !todo.completed && todo.type === state.currentTab;
+            });
+
+            filtered.sort((a, b) => {
+                const dateA = state.currentTab === 'history' ? a.completedDate : a.dueDate;
+                const dateB = state.currentTab === 'history' ? b.completedDate : b.dueDate;
+                return new Date(dateA) - new Date(dateB);
+            });
+
+            if (filtered.length === 0) dom.emptyState.style.display = 'block';
+            else dom.emptyState.style.display = 'none';
+
+            filtered.forEach(todo => {
+                const el = document.createElement('div');
+                el.className = `task-item type-${todo.type} ${todo.completed ? 'completed' : ''}`;
+                const displayDate = state.currentTab === 'history' ? todo.completedDate : todo.dueDate;
+                const isOverdue = !todo.completed && new Date(displayDate) < new Date().setHours(0,0,0,0);
+                
+                el.innerHTML = `
+                    <div class="check-circle" onclick="toggleTodo(${todo.id})">
+                        <i class="ri-check-line"></i>
+                    </div>
+                    <div class="task-content" onclick="toggleTodo(${todo.id})">
+                        <span class="task-text">${todo.text}</span>
+                        <div class="meta-tags">
+                            <span class="date-badge ${isOverdue ? 'overdue' : ''}">
+                                ${displayDate ? displayDate.slice(5) : '无日期'}
+                            </span>
+                            <span class="xp-badge">+${todo.xpReward}</span>
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteTodo(event, ${todo.id})">
+                        <i class="ri-close-line"></i>
+                    </button>
+                `;
+                dom.list.appendChild(el);
+            });
+        }
+
+        function gainXp(amount) {
+            state.xp += amount;
+            if (state.xp >= XP_LIMIT) {
+                state.level++; state.xp -= XP_LIMIT;
+                alert(`升级！当前等级: ${state.level}`);
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            const percent = (state.xp / XP_LIMIT) * 100;
+            dom.xpBar.style.width = `${percent}%`;
+            dom.xpText.innerText = `${state.xp}/${XP_LIMIT}`;
+            const rank = RANKS[Math.min(state.level-1, RANKS.length-1)];
+            dom.levelDisplay.innerText = `Lv.${state.level} ${rank}`;
+        }
+
+        async function save() {
+            // 同时保存到本地和服务器
+            localStorage.setItem('dq_mobile_todos', JSON.stringify(state.todos));
+            localStorage.setItem('dq_mobile_xp', state.xp);
+            localStorage.setItem('dq_mobile_level', state.level);
+            
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ todos: state.todos, xp: state.xp, level: state.level })
+                });
+            } catch (e) {
+                console.log('同步到服务器失败');
+            }
+        }
+
+        let avatarTimer;
+        function setAvatar(emoji, time) {
+            dom.avatar.innerText = emoji;
+            clearTimeout(avatarTimer);
+            avatarTimer = setTimeout(() => dom.avatar.innerText = '🌱', time);
+        }
+
+        dom.addBtn.addEventListener('click', addTodo);
+        dom.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTodo(); });
+
+        init();
+
+    </script>
+</body>
+</html>
