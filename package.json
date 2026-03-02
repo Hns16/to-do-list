@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node server.js",
-    "pm2": "pm2 start ecosystem.config.js"
+    "pm2": "pm2 start ecosystem.config.js",
+    "health": "bash ./scripts/health-check.sh",
+    "backup:now": "bash ./scripts/backup-now.sh"
   },
   "dependencies": {}
 }

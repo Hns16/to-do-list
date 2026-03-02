@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DreamQuest Mobile | 移动版待办</title>
     <!-- 引入字体和图标 -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" onerror="this.onerror=null;this.href='https://fonts.loli.net/css2?family=Nunito:wght@400;600;700;800&display=swap'">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" onerror="this.onerror=null;this.href='https://fonts.loli.net/css2?family=Manrope:wght@400;500;700;800&family=Sora:wght@600;700;800&display=swap'">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" onerror="this.onerror=null;this.href='https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css'">
     <!-- 核心库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" onerror="window.Sortable={create:()=>{}}"></script>
@@ -13,249 +13,1029 @@
 
     <style>
         :root {
-            --primary: #8b5cf6;
-            --secondary: #ec4899;
-            --accent: #06b6d4;
-            --gold: #f59e0b;
-            --danger: #ef4444;
-            --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --text-main: #374151;
-            --text-light: #6b7280;
-            --radius: 24px;
+            --primary: #0f766e;
+            --primary-strong: #115e59;
+            --accent: #f97316;
+            --gold: #d97706;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --bg: #eef3f9;
+            --panel-dark: #0f172a;
+            --panel-dark-soft: #1e293b;
+            --surface: rgba(255, 255, 255, 0.82);
+            --surface-strong: #ffffff;
+            --border: rgba(15, 23, 42, 0.08);
+            --text-main: #0f172a;
+            --text-light: #64748b;
+            --radius: 26px;
+            --shadow-lg: 0 20px 60px rgba(15, 23, 42, 0.18);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nunito', sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root[data-theme="dark"] {
+            --bg: #0b1220;
+            --panel-dark: #020617;
+            --panel-dark-soft: #0f172a;
+            --surface: rgba(15, 23, 42, 0.82);
+            --surface-strong: #111827;
+            --border: rgba(148, 163, 184, 0.24);
+            --text-main: #e2e8f0;
+            --text-light: #94a3b8;
+            --shadow-lg: 0 20px 60px rgba(2, 6, 23, 0.5);
+            --shadow-md: 0 10px 22px rgba(2, 6, 23, 0.38);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Manrope', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        input, select, button {
+            font: inherit;
+        }
 
         body {
             min-height: 100vh;
-            /* 使用 dvh 解决移动端浏览器地址栏遮挡问题 */
-            height: 100dvh; 
+            height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: var(--bg-gradient);
+            background:
+                radial-gradient(900px circle at -5% -10%, rgba(15, 118, 110, 0.22), transparent 46%),
+                radial-gradient(700px circle at 105% 5%, rgba(249, 115, 22, 0.2), transparent 52%),
+                linear-gradient(145deg, #edf4fa 0%, #f7fafd 48%, #eef2f7 100%);
+            overflow: hidden;
+            position: relative;
+            padding: 22px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        :root[data-theme="dark"] body {
+            background:
+                radial-gradient(900px circle at -5% -10%, rgba(20, 184, 166, 0.16), transparent 46%),
+                radial-gradient(700px circle at 105% 5%, rgba(249, 115, 22, 0.16), transparent 52%),
+                linear-gradient(145deg, #020617 0%, #0b1220 48%, #111827 100%);
+        }
+
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 18% 28%, rgba(15, 118, 110, 0.16) 0%, transparent 42%),
+                radial-gradient(circle at 82% 78%, rgba(249, 115, 22, 0.14) 0%, transparent 46%);
+            filter: blur(46px);
+            animation: pulse 9s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.55; }
+            100% { opacity: 1; }
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1120px;
+            height: min(90dvh, 860px);
+            background: var(--surface);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            overflow: hidden;
+            animation: fadeUp 0.55s ease both;
+            isolation: isolate;
+        }
+
+        .sidebar {
+            width: 300px;
+            padding: 30px 26px;
+            background: linear-gradient(165deg, var(--panel-dark) 0%, var(--panel-dark-soft) 100%);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            flex-shrink: 0;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .avatar {
+            font-size: 62px;
+            cursor: pointer;
+            transition: transform 0.25s ease;
+            display: inline-block;
+            filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.28));
+        }
+
+        .avatar:hover { transform: scale(1.08) rotate(8deg); }
+
+        .user-name {
+            font-family: 'Sora', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .level-pill {
+            background: linear-gradient(90deg, var(--accent), #fb923c);
+            color: #fff7ed;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-block;
+            margin-top: 8px;
+            letter-spacing: 0.2px;
+        }
+
+        .xp-box {
+            background: rgba(248, 250, 252, 0.1);
+            border: 1px solid rgba(248, 250, 252, 0.14);
+            padding: 14px;
+            border-radius: 16px;
+        }
+
+        .xp-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .xp-track {
+            height: 8px;
+            background: rgba(148, 163, 184, 0.24);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #fdba74, var(--accent));
+            border-radius: 999px;
+            transition: width 0.55s ease;
+        }
+
+        .focus-note {
+            margin-top: 4px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(15, 23, 42, 0.25);
+            color: #e2e8f0;
+        }
+
+        .theme-panel {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .theme-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .theme-btn {
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: rgba(148, 163, 184, 0.12);
+            color: #e2e8f0;
+            border-radius: 9px;
+            padding: 7px 8px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.16s ease;
+        }
+
+        .theme-btn.active {
+            background: rgba(15, 118, 110, 0.25);
+            border-color: rgba(20, 184, 166, 0.5);
+            color: #ffffff;
+        }
+
+        .accent-select {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.45);
+            color: #e2e8f0;
+            border-radius: 9px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            outline: none;
+            width: 100%;
+        }
+
+        .focus-title {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            margin-bottom: 4px;
+        }
+
+        .focus-date {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
             position: relative;
         }
 
-        /* 动态背景 */
-        .aurora-bg {
-            position: fixed; inset: 0; z-index: -1;
-            background: 
-                radial-gradient(circle at 10% 20%, rgba(236, 72, 153, 0.25) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.25) 0%, transparent 40%);
-            filter: blur(40px);
-            animation: pulse 8s infinite alternate;
-        }
-        @keyframes pulse { 0% { opacity: 0.6; } 100% { opacity: 1; } }
-
-        /* 主容器 */
-        .app-container {
-            width: 90%; max-width: 1100px; height: 90vh;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            display: flex; overflow: hidden;
-            transition: all 0.3s ease;
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: rgba(15, 23, 42, 0.05);
+            border: 1px solid var(--border);
+            padding: 6px;
+            border-radius: 15px;
+            width: fit-content;
+            align-self: flex-start;
         }
 
-        /* --- 左侧面板 (Sidebar) --- */
-        .sidebar {
-            width: 280px; padding: 30px;
-            background: rgba(255,255,255,0.4);
-            border-right: 1px solid rgba(255,255,255,0.4);
-            display: flex; flex-direction: column; gap: 20px;
+        .nav-tab {
+            padding: 10px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-light);
+            transition: all 0.22s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            background: var(--surface-strong);
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .progress-panel {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .progress-cards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .progress-card {
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        :root[data-theme="dark"] .progress-card {
+            background: #111827;
+            border-color: rgba(148, 163, 184, 0.24);
+        }
+
+        .progress-card strong {
+            font-family: 'Sora', sans-serif;
+            color: var(--primary-strong);
+            font-size: 16px;
+            line-height: 1.2;
+        }
+
+        .progress-card span {
+            color: var(--text-light);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .week-trend {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 6px;
+            align-items: end;
+            min-height: 56px;
+        }
+
+        .week-day {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .week-bar-wrap {
+            width: 100%;
+            height: 34px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .week-bar {
+            width: 100%;
+            background: linear-gradient(180deg, #14b8a6 0%, #0f766e 100%);
+            border-radius: 999px;
+            min-height: 2px;
+        }
+
+        .week-label {
+            color: var(--text-light);
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .tools-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tool-select {
+            flex: 1;
+            border: 1px solid rgba(148, 163, 184, 0.26);
+            background: #f8fafc;
+            padding: 9px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--text-main);
+            font-weight: 700;
+            outline: none;
+        }
+
+        .mobile-chip-rows { display: none; }
+        .mobile-chip-row {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 2px 0;
+        }
+        .mobile-chip-row::-webkit-scrollbar { display: none; }
+        .chip {
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: #ffffff;
+            color: #475569;
+            border-radius: 999px;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.16s ease;
+        }
+        .chip.active {
+            background: rgba(15, 118, 110, 0.14);
+            border-color: rgba(15, 118, 110, 0.4);
+            color: #0f766e;
+        }
+
+        :root[data-theme="dark"] .tool-select,
+        :root[data-theme="dark"] .type-select,
+        :root[data-theme="dark"] .date-picker,
+        :root[data-theme="dark"] .task-edit-input {
+            background: #0f172a;
+            border-color: rgba(148, 163, 184, 0.28);
+            color: #e2e8f0;
+        }
+
+        :root[data-theme="dark"] .main-input {
+            color: #e2e8f0;
+        }
+
+        :root[data-theme="dark"] .main-input::placeholder {
+            color: #64748b;
+        }
+
+        .input-wrapper {
+            background: var(--surface-strong);
+            border-radius: 18px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 18px;
+            border: 1px solid transparent;
+            transition: border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(15, 118, 110, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .type-select,
+        .date-picker {
+            border: 1px solid rgba(148, 163, 184, 0.26);
+            background: #f8fafc;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--text-main);
+            font-weight: 700;
+            outline: none;
             flex-shrink: 0;
         }
 
-        .profile-section { text-align: center; margin-bottom: 10px; }
-        .avatar { font-size: 60px; cursor: pointer; transition: 0.3s; display: inline-block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        .avatar:hover { transform: scale(1.1) rotate(10deg); }
-        .user-name { font-size: 18px; font-weight: 800; color: var(--text-main); margin-top: 5px; }
-        .level-pill {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
-            display: inline-block; margin-top: 5px;
+        .main-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            min-width: 100px;
+            background: transparent;
         }
 
-        /* 经验条区域 */
-        .xp-box { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-        .xp-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-light); margin-bottom: 8px; font-weight: 700; }
-        .xp-track { height: 8px; background: #f3f4f6; border-radius: 5px; overflow: hidden; }
-        .xp-fill { 
-            height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--primary)); 
-            border-radius: 5px; transition: width 0.6s ease;
+        .main-input::placeholder {
+            color: #94a3b8;
+            font-weight: 500;
         }
 
-        /* --- 右侧主内容 --- */
-        .main-content { flex: 1; padding: 30px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-
-        /* 顶部导航 Tabs */
-        .nav-tabs {
-            display: flex; gap: 10px; margin-bottom: 20px;
-            background: rgba(255,255,255,0.5); padding: 5px; border-radius: 16px; 
-            width: fit-content; align-self: flex-start;
-        }
-        .nav-tab {
-            padding: 10px 20px; border-radius: 12px; cursor: pointer;
-            font-size: 14px; font-weight: 700; color: var(--text-light);
-            transition: 0.3s; display: flex; align-items: center; gap: 6px; white-space: nowrap;
-        }
-        .nav-tab.active { background: white; color: var(--primary); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15); }
-
-        /* 输入区域 */
-        .input-wrapper {
-            background: white; border-radius: 20px; padding: 10px;
-            display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.03); margin-bottom: 20px;
-            border: 2px solid transparent; transition: 0.3s;
-        }
-        .input-wrapper:focus-within { border-color: var(--primary); }
-        
-        .type-select, .date-picker {
-            border: none; background: #f3f4f6; padding: 10px; border-radius: 12px;
-            font-size: 13px; color: var(--text-main); font-weight: 700; outline: none; flex-shrink: 0;
-        }
-        .main-input { flex: 1; border: none; outline: none; font-size: 16px; font-weight: 600; color: var(--text-main); min-width: 100px; }
-        
         .add-btn {
-            width: 44px; height: 44px; border-radius: 14px; background: var(--primary); color: white;
-            border: none; font-size: 22px; cursor: pointer; transition: 0.2s; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(15, 118, 110, 0.28);
+            touch-action: manipulation;
         }
-        .add-btn:active { transform: scale(0.95); }
 
-        /* 列表容器 */
-        .task-list-container { flex: 1; overflow-y: auto; padding: 2px; -webkit-overflow-scrolling: touch; }
-        .task-list-container::-webkit-scrollbar { width: 4px; }
-        .task-list-container::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-        
-        /* 任务卡片 */
-        .task-item {
-            background: rgba(255,255,255,0.9); margin-bottom: 12px; padding: 16px; border-radius: 16px;
-            display: flex; align-items: center; gap: 12px; position: relative;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02); transition: all 0.2s;
-            border-left: 4px solid transparent; animation: slideIn 0.3s ease;
+        .add-btn:hover { transform: translateY(-1px); }
+        .add-btn:active { transform: scale(0.94); }
+
+        .task-list-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2px;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            scroll-padding-bottom: 160px;
         }
-        .task-item.type-longterm { border-left-color: var(--gold); background: linear-gradient(to right, #fffbf0, #fff); }
-        .task-item.type-daily { border-left-color: var(--primary); }
-        
-        .task-item.completed { opacity: 0.7; filter: grayscale(1); }
-        .task-item.completed .task-text { text-decoration: line-through; color: var(--text-light); }
+
+        .task-list-container::-webkit-scrollbar { width: 6px; }
+        .task-list-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+
+        .task-item {
+            background: rgba(255, 255, 255, 0.88);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: slideIn 0.28s ease both;
+            transform-origin: center;
+        }
+
+        :root[data-theme="dark"] .task-item {
+            background: rgba(15, 23, 42, 0.78);
+            border-color: rgba(148, 163, 184, 0.24);
+        }
+
+        :root[data-theme="dark"] .task-item.type-longterm {
+            background: linear-gradient(to right, rgba(146, 64, 14, 0.22) 0%, rgba(15, 23, 42, 0.82) 34%);
+        }
+
+        .task-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+        }
+
+        .task-item.type-longterm {
+            border-left: 4px solid var(--gold);
+            background: linear-gradient(to right, #fffbeb 0%, rgba(255, 255, 255, 0.96) 34%);
+        }
+
+        .task-item.type-daily { border-left: 4px solid var(--primary); }
+        .task-item.just-added { animation: popIn 0.34s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+        .task-item.just-completed { animation: completeFlash 0.42s ease both; }
+
+        .task-item.completed {
+            opacity: 0.68;
+            filter: grayscale(0.2);
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
 
         .check-circle {
-            width: 28px; height: 28px; border-radius: 50%; border: 2px solid #d1d5db;
-            flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: 0.3s;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            flex-shrink: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
-        .task-item.completed .check-circle { background: #10b981; border-color: #10b981; }
-        .check-circle i { color: white; font-size: 16px; opacity: 0; transform: scale(0); transition: 0.2s; }
-        .task-item.completed .check-circle i { opacity: 1; transform: scale(1); }
+
+        .task-item.completed .check-circle {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .check-circle i {
+            color: white;
+            font-size: 17px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: 0.2s;
+        }
+
+        .task-item.completed .check-circle i {
+            opacity: 1;
+            transform: scale(1);
+        }
 
         .task-content { flex: 1; overflow: hidden; }
-        .task-text { font-size: 15px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-        
-        .meta-tags { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .date-badge { font-size: 11px; color: var(--text-light); background: #f3f4f6; padding: 3px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
-        .date-badge.overdue { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-        .xp-badge { font-size: 10px; color: var(--primary); font-weight: 800; background: rgba(139, 92, 246, 0.1); padding: 2px 6px; border-radius: 4px; }
 
-        .delete-btn {
-            color: #ef4444; background: rgba(239, 68, 68, 0.1); width: 34px; height: 34px; border-radius: 10px; border:none; 
-            cursor: pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;
+        .task-text {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 7px;
+            letter-spacing: 0.1px;
+            line-height: 1.35;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
         }
 
-        .empty-state { text-align: center; margin-top: 60px; color: var(--text-light); display: none; }
-        .empty-state i { font-size: 48px; opacity: 0.3; margin-bottom: 10px; display: block; }
+        .task-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .task-edit-input {
+            width: 100%;
+            border: 1px solid rgba(15, 118, 110, 0.35);
+            border-radius: 9px;
+            padding: 8px 10px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            outline: none;
+            background: #ffffff;
+        }
 
-        /* ================= 移动端适配核心代码 ================= */
+        .task-edit-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mini-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 6px 9px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .mini-btn.save {
+            background: rgba(22, 163, 74, 0.14);
+            color: #166534;
+        }
+
+        .mini-btn.cancel {
+            background: rgba(100, 116, 139, 0.14);
+            color: #334155;
+        }
+
+        .meta-tags {
+            display: flex;
+            gap: 7px;
+            align-items: center;
+            flex-wrap: wrap;
+            opacity: 0.92;
+        }
+
+        .type-badge {
+            font-size: 10px;
+            color: #475569;
+            background: #e8edf3;
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        :root[data-theme="dark"] .type-badge {
+            background: #1f2937;
+            color: #cbd5e1;
+        }
+
+        .date-badge {
+            font-size: 11px;
+            color: var(--text-light);
+            background: #f1f5f9;
+            padding: 3px 8px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+        }
+
+        :root[data-theme="dark"] .date-badge {
+            background: #1e293b;
+        }
+
+        :root[data-theme="dark"] .tools-row {
+            background: rgba(15, 23, 42, 0.88);
+            border-color: rgba(148, 163, 184, 0.24);
+        }
+        :root[data-theme="dark"] .chip {
+            background: #0f172a;
+            color: #cbd5e1;
+            border-color: rgba(148, 163, 184, 0.3);
+        }
+        :root[data-theme="dark"] .chip.active {
+            background: rgba(20, 184, 166, 0.2);
+            color: #5eead4;
+            border-color: rgba(20, 184, 166, 0.45);
+        }
+
+        .date-badge i {
+            font-size: 12px;
+        }
+
+        .date-badge.today {
+            color: #0f766e;
+            background: rgba(15, 118, 110, 0.12);
+        }
+
+        .date-badge.tomorrow {
+            color: #0369a1;
+            background: rgba(3, 105, 161, 0.12);
+        }
+
+        .date-badge.overdue {
+            color: var(--danger);
+            background: rgba(220, 38, 38, 0.12);
+        }
+
+        .date-badge.done {
+            color: #166534;
+            background: rgba(22, 163, 74, 0.14);
+        }
+
+        .xp-badge {
+            font-size: 10px;
+            color: var(--primary-strong);
+            font-weight: 800;
+            background: rgba(15, 118, 110, 0.12);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .delete-btn {
+            color: var(--danger);
+            background: rgba(220, 38, 38, 0.08);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0.2;
+            touch-action: manipulation;
+        }
+
+        .task-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .edit-btn {
+            color: #0f766e;
+            background: rgba(15, 118, 110, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0.3;
+            touch-action: manipulation;
+        }
+
+        .task-item:hover .edit-btn {
+            opacity: 1;
+            background: rgba(15, 118, 110, 0.14);
+        }
+
+        .task-item:hover .delete-btn {
+            opacity: 1;
+            background: rgba(220, 38, 38, 0.14);
+        }
+
+        .empty-state {
+            text-align: center;
+            margin-top: 70px;
+            color: var(--text-light);
+            display: none;
+        }
+
+        .empty-state i {
+            font-size: 52px;
+            opacity: 0.22;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .empty-action {
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #0f766e;
+            background: rgba(15, 118, 110, 0.12);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.16s ease, background 0.16s ease;
+            touch-action: manipulation;
+        }
+        .empty-action:hover { transform: translateY(-1px); background: rgba(15, 118, 110, 0.18); }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(18px + env(safe-area-inset-bottom));
+            transform: translateX(-50%) translateY(16px);
+            background: rgba(15, 23, 42, 0.88);
+            color: #f8fafc;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            z-index: 30;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        button:focus-visible,
+        select:focus-visible,
+        input:focus-visible {
+            outline: 2px solid rgba(15, 118, 110, 0.42);
+            outline-offset: 2px;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.96) translateY(6px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes completeFlash {
+            0% { box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+            50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2); }
+            100% { box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            .aurora-bg { animation: none; }
+        }
+
         @media (max-width: 768px) {
-            body { 
-                align-items: flex-start; /* 顶部对齐 */
-                background: #f3f4f6; /* 移动端背景纯色化以减少性能消耗，或保留渐变 */
-                background: var(--bg-gradient);
-            }
-            
-            .app-container {
-                width: 100%; height: 100dvh; 
-                border-radius: 0; 
-                flex-direction: column; /* 上下布局 */
-                border: none;
+            body {
+                align-items: flex-start;
+                padding: 0;
+                background: linear-gradient(150deg, #eef3f9 0%, #f8fafd 100%);
             }
 
-            /* 头部变身 */
+            .app-container {
+                width: 100%;
+                height: 100dvh;
+                border-radius: 0;
+                flex-direction: column;
+                border: none;
+                box-shadow: none;
+            }
+
             .sidebar {
-                width: 100%; height: auto;
-                flex-direction: row; 
+                width: 100%;
+                height: auto;
+                flex-direction: row;
                 align-items: center;
                 justify-content: space-between;
-                padding: 15px 20px;
-                background: rgba(255,255,255,0.6);
+                padding: 8px 10px;
                 border-right: none;
-                border-bottom: 1px solid rgba(255,255,255,0.5);
+                border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+                gap: 8px;
+            }
+
+            .profile-section {
+                margin-bottom: 0;
+                text-align: left;
+                display: flex;
+                align-items: center;
                 gap: 10px;
             }
 
-            .profile-section { 
-                margin-bottom: 0; 
-                text-align: left; 
-                display: flex; 
-                align-items: center; 
-                gap: 10px; 
-            }
-            .avatar { font-size: 40px; margin: 0; }
-            .user-name { font-size: 16px; margin: 0; }
-            .level-pill { margin: 0; font-size: 10px; padding: 2px 8px; }
+            .avatar { font-size: 34px; margin: 0; }
+            .user-name { font-size: 14px; margin: 0; }
+            .level-pill { margin-top: 4px; font-size: 10px; padding: 2px 8px; }
 
-            /* 移动端 XP 条简化 */
-            .xp-box { 
-                padding: 0; box-shadow: none; background: transparent; 
-                width: 120px; 
+            .xp-box {
+                padding: 0;
+                box-shadow: none;
+                background: transparent;
+                border: none;
+                width: 74px;
             }
-            .xp-info { display: none; } /* 隐藏文字，只留条 */
-            .xp-track { height: 6px; background: rgba(0,0,0,0.1); }
-            
-            /* 主内容调整 */
-            .main-content { padding: 15px; }
-            
-            .nav-tabs { 
-                width: 100%; 
-                justify-content: space-between; 
-                background: white;
-                margin-bottom: 15px;
-            }
-            .nav-tab { 
-                flex: 1; justify-content: center; padding: 12px 0; font-size: 13px; 
+            .focus-note {
+                display: none;
             }
 
-            /* 输入框多行排列 */
+            .xp-info { display: none; }
+
+            .xp-track {
+                height: 6px;
+                background: rgba(148, 163, 184, 0.42);
+            }
+
+            .main-content {
+                padding: 10px;
+                height: 100%;
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            .nav-tabs {
+                width: 100%;
+                justify-content: space-between;
+                background: #ffffff;
+                margin-bottom: 6px;
+            }
+
+            .nav-tab {
+                flex: 1;
+                justify-content: center;
+                padding: 12px 0;
+                font-size: 13px;
+            }
+
+            .progress-panel {
+                display: none;
+            }
+
+            .week-trend { display: none; }
+
+            .tools-row { display: none; }
+            .mobile-chip-rows {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                padding: 4px 2px;
+                margin-bottom: 6px;
+            }
+            #mobile-sort-row { display: none; }
+
             .input-wrapper {
-                flex-wrap: wrap; /* 允许换行 */
+                position: fixed;
+                left: 10px;
+                right: 10px;
+                bottom: calc(10px + env(safe-area-inset-bottom));
+                z-index: 20;
                 gap: 8px;
-                padding: 12px;
+                padding: 8px;
+                border: 1px solid rgba(148, 163, 184, 0.24);
+                box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+                margin-top: 0;
+                background: rgba(255, 255, 255, 0.94);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
             }
-            .type-select { flex: 1; }
-            .date-picker { flex: 1; }
-            .main-input { 
-                width: 100%; /* 独占一行 */
-                order: 3; /* 放到下面 */
-                padding: 5px 0;
+            :root[data-theme="dark"] .input-wrapper {
+                background: rgba(15, 23, 42, 0.92);
             }
-            .add-btn { order: 4; margin-left: auto; }
 
-            /* 列表优化 */
-            .task-text { white-space: normal; /* 允许文字换行 */ }
-            
-            /* 始终显示删除按钮 (手机没悬停) */
-            .delete-btn { opacity: 1; background: transparent; color: #9ca3af; }
-            
-            .aurora-bg { display: none; /* 手机端去掉复杂背景动画省电 */ }
+            .type-select,
+            .date-picker { display: none; }
+
+            .progress-cards {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .main-input {
+                width: auto;
+                order: 1;
+                padding: 8px 6px;
+                font-size: 16px;
+            }
+
+            .add-btn { order: 2; margin-left: auto; width: 46px; height: 46px; }
+            .task-list-container {
+                flex: 1;
+                min-height: 0;
+                padding-bottom: 98px;
+            }
+            .check-circle { width: 34px; height: 34px; }
+            .task-actions { gap: 4px; }
+            .task-item { border-radius: 12px; padding: 14px 12px; }
+            .task-text { white-space: normal; }
+            .delete-btn { opacity: 1; background: transparent; color: #94a3b8; width: 40px; height: 40px; }
+            .edit-btn { opacity: 1; background: transparent; color: #0f766e; width: 40px; height: 40px; }
+            .aurora-bg { display: none; }
         }
     </style>
 </head>
@@ -284,6 +1064,22 @@
                     <div class="xp-fill" id="xp-bar"></div>
                 </div>
             </div>
+
+            <div class="focus-note">
+                <div class="focus-title">Dream in small steps</div>
+                <div class="focus-date" id="focus-date">--</div>
+                <div class="theme-panel">
+                    <div class="theme-row">
+                        <button class="theme-btn active" id="theme-light">浅色</button>
+                        <button class="theme-btn" id="theme-dark">深色</button>
+                    </div>
+                    <select class="accent-select" id="accent-select">
+                        <option value="teal">强调色：松石</option>
+                        <option value="amber">强调色：琥珀</option>
+                        <option value="ocean">强调色：海蓝</option>
+                    </select>
+                </div>
+            </div>
         </aside>
 
         <!-- 主界面 -->
@@ -301,26 +1097,79 @@
                 </div>
             </div>
 
+            <div class="progress-panel">
+                <div class="progress-cards">
+                    <div class="progress-card">
+                        <strong id="stat-today">0</strong>
+                        <span>今日完成</span>
+                    </div>
+                    <div class="progress-card">
+                        <strong id="stat-streak">0</strong>
+                        <span>连续天数</span>
+                    </div>
+                    <div class="progress-card">
+                        <strong id="stat-active">0</strong>
+                        <span>当前待办</span>
+                    </div>
+                </div>
+                <div class="week-trend" id="week-trend"></div>
+            </div>
+
             <div class="input-wrapper" id="input-area">
                 <select class="type-select" id="task-type">
-                    <option value="daily">Daily</option>
-                    <option value="longterm">Epic</option>
+                    <option value="daily">日常</option>
+                    <option value="longterm">长期目标</option>
                 </select>
                 <input type="date" class="date-picker" id="task-date">
                 <input type="text" class="main-input" id="todo-input" placeholder="添加新任务...">
                 <button class="add-btn" id="add-btn"><i class="ri-add-line"></i></button>
             </div>
 
+            <div class="tools-row">
+                <select class="tool-select" id="filter-select">
+                    <option value="all">筛选：全部</option>
+                    <option value="overdue">筛选：仅逾期</option>
+                    <option value="today">筛选：今天</option>
+                    <option value="this_week">筛选：本周</option>
+                    <option value="high_reward">筛选：高奖励</option>
+                </select>
+                <select class="tool-select" id="sort-select">
+                    <option value="due_asc">排序：到期优先</option>
+                    <option value="due_desc">排序：最晚到期</option>
+                    <option value="reward_desc">排序：奖励优先</option>
+                    <option value="created_desc">排序：新建优先</option>
+                </select>
+            </div>
+            <div class="mobile-chip-rows">
+                <div class="mobile-chip-row" id="mobile-filter-row">
+                    <button class="chip" data-filter-chip="all">全部</button>
+                    <button class="chip" data-filter-chip="overdue">逾期</button>
+                    <button class="chip" data-filter-chip="today">今天</button>
+                    <button class="chip" data-filter-chip="this_week">本周</button>
+                    <button class="chip" data-filter-chip="high_reward">高奖励</button>
+                </div>
+                <div class="mobile-chip-row" id="mobile-sort-row">
+                    <button class="chip" data-sort-chip="due_asc">到期优先</button>
+                    <button class="chip" data-sort-chip="due_desc">最晚到期</button>
+                    <button class="chip" data-sort-chip="reward_desc">奖励优先</button>
+                    <button class="chip" data-sort-chip="created_desc">新建优先</button>
+                </div>
+            </div>
+
             <div class="task-list-container">
                 <div id="todo-list"></div>
                 <div class="empty-state" id="empty-state">
                     <i class="ri-inbox-line"></i>
-                    <p>暂无任务，享受当下</p>
+                    <p id="empty-text">暂无任务，享受当下</p>
+                    <button class="empty-action" id="empty-action">
+                        <i class="ri-add-circle-line"></i> 创建第一条任务
+                    </button>
                 </div>
             </div>
 
         </main>
     </div>
+    <div class="toast" id="toast"></div>
 
     <script>
         // --- 逻辑部分保持不变，适配了触摸事件 ---
@@ -357,7 +1206,12 @@
             todos: [],
             xp: 0,
             level: 1,
-            currentTab: 'daily'
+            currentTab: 'daily',
+            filterBy: 'all',
+            sortBy: 'due_asc',
+            editingId: null,
+            recentlyAddedId: null,
+            recentlyCompletedId: null
         };
         
         // 从服务器加载数据
@@ -380,6 +1234,13 @@
 
         const RANKS = ["新手", "见习", "冒险者", "精英", "大师", "传说"];
         const XP_LIMIT = 100;
+        const THEME_KEY = 'dq_mobile_theme';
+        const ACCENT_KEY = 'dq_mobile_accent';
+        const ACCENTS = {
+            teal: { primary: '#0f766e', primaryStrong: '#115e59', accent: '#f97316', gold: '#d97706' },
+            amber: { primary: '#b45309', primaryStrong: '#92400e', accent: '#0f766e', gold: '#f59e0b' },
+            ocean: { primary: '#0369a1', primaryStrong: '#075985', accent: '#0f766e', gold: '#0284c7' }
+        };
 
         const dom = {
             list: document.getElementById('todo-list'),
@@ -389,20 +1250,166 @@
             addBtn: document.getElementById('add-btn'),
             inputArea: document.getElementById('input-area'),
             emptyState: document.getElementById('empty-state'),
+            emptyText: document.getElementById('empty-text'),
+            emptyAction: document.getElementById('empty-action'),
+            filterSelect: document.getElementById('filter-select'),
+            sortSelect: document.getElementById('sort-select'),
             xpBar: document.getElementById('xp-bar'),
             xpText: document.getElementById('xp-text'),
             levelDisplay: document.getElementById('level-display'),
-            avatar: document.getElementById('avatar')
+            avatar: document.getElementById('avatar'),
+            toast: document.getElementById('toast'),
+            statToday: document.getElementById('stat-today'),
+            statStreak: document.getElementById('stat-streak'),
+            statActive: document.getElementById('stat-active'),
+            weekTrend: document.getElementById('week-trend'),
+            focusDate: document.getElementById('focus-date'),
+            themeLight: document.getElementById('theme-light'),
+            themeDark: document.getElementById('theme-dark'),
+            accentSelect: document.getElementById('accent-select'),
+            filterChips: document.querySelectorAll('[data-filter-chip]'),
+            sortChips: document.querySelectorAll('[data-sort-chip]')
         };
+
+        let toastTimer;
+
+        function showToast(message) {
+            dom.toast.innerText = message;
+            dom.toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => dom.toast.classList.remove('show'), 1600);
+        }
+
+        function setThemeButtons(theme) {
+            dom.themeLight.classList.toggle('active', theme === 'light');
+            dom.themeDark.classList.toggle('active', theme === 'dark');
+        }
+
+        function applyTheme(theme) {
+            const normalized = theme === 'dark' ? 'dark' : 'light';
+            if (normalized === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+            }
+            localStorage.setItem(THEME_KEY, normalized);
+            setThemeButtons(normalized);
+        }
+
+        function applyAccent(name) {
+            const presetName = ACCENTS[name] ? name : 'teal';
+            const preset = ACCENTS[presetName];
+            document.documentElement.style.setProperty('--primary', preset.primary);
+            document.documentElement.style.setProperty('--primary-strong', preset.primaryStrong);
+            document.documentElement.style.setProperty('--accent', preset.accent);
+            document.documentElement.style.setProperty('--gold', preset.gold);
+            localStorage.setItem(ACCENT_KEY, presetName);
+            dom.accentSelect.value = presetName;
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function dayDiffFromToday(dateStr) {
+            if (!dateStr) return null;
+            const target = new Date(`${dateStr}T00:00:00`);
+            if (Number.isNaN(target.getTime())) return null;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return Math.round((target - today) / 86400000);
+        }
+
+        function formatDateLabel(dateStr, completed) {
+            if (!dateStr) return '无日期';
+            const diff = dayDiffFromToday(dateStr);
+            if (diff === null) return dateStr.slice(5);
+            if (completed) {
+                if (diff === 0) return '今天完成';
+                if (diff < 0) return `${Math.abs(diff)}天前完成`;
+                return `${diff}天后完成`;
+            }
+            if (diff === 0) return '今天';
+            if (diff === 1) return '明天';
+            if (diff === -1) return '逾期1天';
+            if (diff < 0) return `逾期${Math.abs(diff)}天`;
+            return `${diff}天后`;
+        }
+
+        function getDateBadgeInfo(dateStr, completed) {
+            const base = { text: '无日期', cls: '', icon: 'ri-calendar-line' };
+            if (!dateStr) return base;
+            const diff = dayDiffFromToday(dateStr);
+            if (diff === null) return { text: dateStr.slice(5), cls: '', icon: 'ri-calendar-event-line' };
+            if (completed) {
+                if (diff === 0) return { text: '今天完成', cls: 'done', icon: 'ri-check-double-line' };
+                if (diff < 0) return { text: `${Math.abs(diff)}天前完成`, cls: 'done', icon: 'ri-check-line' };
+                return { text: `${diff}天后完成`, cls: 'done', icon: 'ri-check-line' };
+            }
+            if (diff === 0) return { text: '今天', cls: 'today', icon: 'ri-time-line' };
+            if (diff === 1) return { text: '明天', cls: 'tomorrow', icon: 'ri-sun-line' };
+            if (diff < 0) return { text: `逾期${Math.abs(diff)}天`, cls: 'overdue', icon: 'ri-alarm-warning-line' };
+            return { text: `${diff}天后`, cls: '', icon: 'ri-calendar-event-line' };
+        }
 
         function init() {
             dom.dateInput.valueAsDate = new Date();
+            const now = new Date();
+            const week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            dom.focusDate.innerText = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${week[now.getDay()]}`;
+            applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+            applyAccent(localStorage.getItem(ACCENT_KEY) || 'teal');
             loadData(); // 从服务器加载数据
             // 移动端也支持长按拖拽
             new Sortable(dom.list, { 
                 animation: 200, 
                 delay: 200,
                 delayOnTouchOnly: true 
+            });
+            dom.themeLight.addEventListener('click', () => applyTheme('light'));
+            dom.themeDark.addEventListener('click', () => applyTheme('dark'));
+            dom.accentSelect.addEventListener('change', (e) => applyAccent(e.target.value));
+            dom.filterSelect.addEventListener('change', (e) => {
+                state.filterBy = e.target.value;
+                render();
+            });
+            dom.sortSelect.addEventListener('change', (e) => {
+                state.sortBy = e.target.value;
+                render();
+            });
+            dom.filterChips.forEach((chip) => {
+                chip.addEventListener('click', () => {
+                    state.filterBy = chip.dataset.filterChip;
+                    render();
+                });
+            });
+            dom.sortChips.forEach((chip) => {
+                chip.addEventListener('click', () => {
+                    state.sortBy = chip.dataset.sortChip;
+                    render();
+                });
+            });
+            dom.emptyAction.addEventListener('click', () => {
+                if (state.currentTab === 'history') switchTab('daily');
+                if (state.currentTab !== 'history') dom.inputArea.style.display = 'flex';
+                dom.inputArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                dom.input.focus();
+            });
+        }
+
+        function syncControls() {
+            dom.filterSelect.value = state.filterBy;
+            dom.sortSelect.value = state.sortBy;
+            dom.filterChips.forEach((chip) => {
+                chip.classList.toggle('active', chip.dataset.filterChip === state.filterBy);
+            });
+            dom.sortChips.forEach((chip) => {
+                chip.classList.toggle('active', chip.dataset.sortChip === state.sortBy);
             });
         }
 
@@ -417,12 +1424,20 @@
                 dom.inputArea.style.display = 'flex';
                 dom.typeSelect.value = tab; 
             }
+            state.editingId = null;
             render();
         }
 
         function addTodo() {
             const text = dom.input.value.trim();
-            if (!text) return;
+            if (!text) {
+                showToast('请输入任务内容');
+                return;
+            }
+            if (text.length > 120) {
+                showToast('任务内容最多 120 个字');
+                return;
+            }
 
             const newTodo = {
                 id: Date.now(),
@@ -435,6 +1450,10 @@
             };
 
             state.todos.unshift(newTodo);
+            state.recentlyAddedId = newTodo.id;
+            setTimeout(() => {
+                if (state.recentlyAddedId === newTodo.id) state.recentlyAddedId = null;
+            }, 420);
             save(); render(); playSound('add');
             dom.input.value = '';
             setAvatar('🧐', 1000);
@@ -447,6 +1466,10 @@
             todo.completed = !todo.completed;
             if (todo.completed) {
                 todo.completedDate = new Date().toISOString().split('T')[0];
+                state.recentlyCompletedId = todo.id;
+                setTimeout(() => {
+                    if (state.recentlyCompletedId === todo.id) state.recentlyCompletedId = null;
+                }, 520);
                 gainXp(todo.xpReward);
                 playSound('complete');
                 confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
@@ -454,6 +1477,7 @@
             } else {
                 state.xp = Math.max(0, state.xp - todo.xpReward);
                 todo.completedDate = null;
+                state.recentlyCompletedId = null;
             }
             save(); 
             setTimeout(() => { render(); updateStats(); }, 250);
@@ -467,47 +1491,244 @@
             }
         }
 
-        function render() {
-            dom.list.innerHTML = '';
-            const filtered = state.todos.filter(todo => {
-                if (state.currentTab === 'history') return todo.completed;
-                return !todo.completed && todo.type === state.currentTab;
+        function startEditTodo(e, id) {
+            e.stopPropagation();
+            const todo = state.todos.find(t => t.id === id);
+            if (!todo) return;
+            state.editingId = id;
+            render();
+        }
+
+        function commitEditTodo(id, rawText) {
+            const clean = rawText.trim();
+            if (!clean) {
+                showToast('任务内容不能为空');
+                return;
+            }
+            if (clean.length > 120) {
+                showToast('任务内容最多 120 个字');
+                return;
+            }
+            const todo = state.todos.find(t => t.id === id);
+            if (!todo) return;
+            todo.text = clean;
+            state.editingId = null;
+            save();
+            render();
+            showToast('任务已更新');
+        }
+
+        function cancelEditTodo() {
+            state.editingId = null;
+            render();
+        }
+
+        function sameDay(dateStr, dayObj) {
+            if (!dateStr) return false;
+            const a = new Date(`${dateStr}T00:00:00`);
+            return a.getFullYear() === dayObj.getFullYear() &&
+                a.getMonth() === dayObj.getMonth() &&
+                a.getDate() === dayObj.getDate();
+        }
+
+        function getWeekBuckets() {
+            const result = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            for (let i = 6; i >= 0; i -= 1) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - i);
+                result.push({ day: d, label: `${d.getMonth() + 1}/${d.getDate()}`, count: 0 });
+            }
+            state.todos
+                .filter(t => t.completed && t.completedDate)
+                .forEach(todo => {
+                    const idx = result.findIndex(item => sameDay(todo.completedDate, item.day));
+                    if (idx >= 0) result[idx].count += 1;
+                });
+            return result;
+        }
+
+        function calcStreak() {
+            const completedDays = new Set(
+                state.todos
+                    .filter(t => t.completed && t.completedDate)
+                    .map(t => t.completedDate)
+            );
+            let streak = 0;
+            const current = new Date();
+            current.setHours(0, 0, 0, 0);
+            while (true) {
+                const y = current.getFullYear();
+                const m = String(current.getMonth() + 1).padStart(2, '0');
+                const d = String(current.getDate()).padStart(2, '0');
+                const key = `${y}-${m}-${d}`;
+                if (!completedDays.has(key)) break;
+                streak += 1;
+                current.setDate(current.getDate() - 1);
+            }
+            return streak;
+        }
+
+        function renderProgressPanel() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayDone = state.todos.filter(t => t.completed && sameDay(t.completedDate, today)).length;
+            const active = state.todos.filter(t => !t.completed).length;
+            const streak = calcStreak();
+            dom.statToday.innerText = String(todayDone);
+            dom.statStreak.innerText = String(streak);
+            dom.statActive.innerText = String(active);
+
+            const buckets = getWeekBuckets();
+            const maxCount = Math.max(1, ...buckets.map(b => b.count));
+            dom.weekTrend.innerHTML = buckets.map(item => {
+                const h = Math.max(6, Math.round((item.count / maxCount) * 34));
+                return `
+                    <div class="week-day" title="${item.label} 完成 ${item.count}">
+                        <div class="week-bar-wrap"><div class="week-bar" style="height:${h}px"></div></div>
+                        <div class="week-label">${item.label}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getFilterDate(todo) {
+            return state.currentTab === 'history' ? todo.completedDate : todo.dueDate;
+        }
+
+        function isInCurrentWeek(dateStr) {
+            if (!dateStr) return false;
+            const date = new Date(`${dateStr}T00:00:00`);
+            if (Number.isNaN(date.getTime())) return false;
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const weekEnd = new Date(now);
+            weekEnd.setDate(now.getDate() + 7);
+            return date >= now && date <= weekEnd;
+        }
+
+        function applyFilterAndSort(todos) {
+            const todayBase = new Date();
+            todayBase.setHours(0, 0, 0, 0);
+            const filtered = todos.filter(todo => {
+                const dateStr = getFilterDate(todo);
+                const date = dateStr ? new Date(`${dateStr}T00:00:00`) : null;
+                if (state.filterBy === 'overdue') {
+                    if (!date || Number.isNaN(date.getTime())) return false;
+                    return date < todayBase;
+                }
+                if (state.filterBy === 'today') {
+                    return !!date && !Number.isNaN(date.getTime()) && sameDay(dateStr, todayBase);
+                }
+                if (state.filterBy === 'this_week') return isInCurrentWeek(dateStr);
+                if (state.filterBy === 'high_reward') return todo.xpReward >= 50;
+                return true;
             });
 
             filtered.sort((a, b) => {
-                const dateA = state.currentTab === 'history' ? a.completedDate : a.dueDate;
-                const dateB = state.currentTab === 'history' ? b.completedDate : b.dueDate;
-                return new Date(dateA) - new Date(dateB);
+                if (state.sortBy === 'reward_desc') return b.xpReward - a.xpReward;
+                if (state.sortBy === 'created_desc') return Number(b.id) - Number(a.id);
+                const dateA = new Date(`${getFilterDate(a) || '2099-12-31'}T00:00:00`).getTime();
+                const dateB = new Date(`${getFilterDate(b) || '2099-12-31'}T00:00:00`).getTime();
+                if (state.sortBy === 'due_desc') return dateB - dateA;
+                return dateA - dateB;
             });
+            return filtered;
+        }
 
-            if (filtered.length === 0) dom.emptyState.style.display = 'block';
-            else dom.emptyState.style.display = 'none';
+        function render() {
+            syncControls();
+            dom.list.innerHTML = '';
+            const base = state.todos.filter(todo => {
+                if (state.currentTab === 'history') return todo.completed;
+                return !todo.completed && todo.type === state.currentTab;
+            });
+            const filtered = applyFilterAndSort(base);
+
+            if (filtered.length === 0) {
+                dom.emptyState.style.display = 'block';
+                if (base.length === 0) {
+                    dom.emptyText.innerText = state.currentTab === 'history' ? '还没有完成记录' : '暂无任务，开始第一条吧';
+                    dom.emptyAction.style.display = state.currentTab === 'history' ? 'none' : 'inline-flex';
+                } else {
+                    dom.emptyText.innerText = '当前筛选下没有匹配任务';
+                    dom.emptyAction.style.display = 'none';
+                }
+            } else {
+                dom.emptyState.style.display = 'none';
+            }
 
             filtered.forEach(todo => {
                 const el = document.createElement('div');
-                el.className = `task-item type-${todo.type} ${todo.completed ? 'completed' : ''}`;
+                const visualClass = state.recentlyAddedId === todo.id ? 'just-added' : (state.recentlyCompletedId === todo.id ? 'just-completed' : '');
+                el.className = `task-item type-${todo.type} ${todo.completed ? 'completed' : ''} ${visualClass}`;
+                el.style.animationDelay = `${Math.min(dom.list.children.length * 28, 180)}ms`;
                 const displayDate = state.currentTab === 'history' ? todo.completedDate : todo.dueDate;
-                const isOverdue = !todo.completed && new Date(displayDate) < new Date().setHours(0,0,0,0);
+                const typeLabel = todo.type === 'longterm' ? '长期目标' : '日常';
+                const safeText = escapeHtml(todo.text);
+                const dateInfo = getDateBadgeInfo(displayDate, !!todo.completed);
+                const isEditing = state.editingId === todo.id;
                 
                 el.innerHTML = `
                     <div class="check-circle" onclick="toggleTodo(${todo.id})">
                         <i class="ri-check-line"></i>
                     </div>
-                    <div class="task-content" onclick="toggleTodo(${todo.id})">
-                        <span class="task-text">${todo.text}</span>
+                    <div class="task-content">
+                        ${isEditing ? `
+                        <div class="task-editor">
+                            <input class="task-edit-input" data-edit-id="${todo.id}" value="${safeText}" maxlength="120">
+                            <div class="task-edit-actions">
+                                <button class="mini-btn save" data-save-id="${todo.id}">保存</button>
+                                <button class="mini-btn cancel" data-cancel-id="${todo.id}">取消</button>
+                            </div>
+                        </div>
+                        ` : `
+                        <span class="task-text" onclick="toggleTodo(${todo.id})">${safeText}</span>
                         <div class="meta-tags">
-                            <span class="date-badge ${isOverdue ? 'overdue' : ''}">
-                                ${displayDate ? displayDate.slice(5) : '无日期'}
+                            <span class="type-badge">${typeLabel}</span>
+                            <span class="date-badge ${dateInfo.cls}">
+                                <i class="${dateInfo.icon}"></i>
+                                ${dateInfo.text}
                             </span>
                             <span class="xp-badge">+${todo.xpReward}</span>
                         </div>
+                        `}
                     </div>
-                    <button class="delete-btn" onclick="deleteTodo(event, ${todo.id})">
-                        <i class="ri-close-line"></i>
-                    </button>
+                    <div class="task-actions">
+                        <button class="edit-btn" onclick="startEditTodo(event, ${todo.id})">
+                            <i class="ri-edit-2-line"></i>
+                        </button>
+                        <button class="delete-btn" onclick="deleteTodo(event, ${todo.id})">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
                 `;
                 dom.list.appendChild(el);
+
+                if (isEditing) {
+                    const input = el.querySelector(`[data-edit-id="${todo.id}"]`);
+                    const saveBtn = el.querySelector(`[data-save-id="${todo.id}"]`);
+                    const cancelBtn = el.querySelector(`[data-cancel-id="${todo.id}"]`);
+                    if (input) {
+                        requestAnimationFrame(() => {
+                            input.focus();
+                            input.setSelectionRange(input.value.length, input.value.length);
+                        });
+                        input.addEventListener('keydown', (ev) => {
+                            if (ev.key === 'Enter') commitEditTodo(todo.id, input.value);
+                            if (ev.key === 'Escape') cancelEditTodo();
+                        });
+                        input.addEventListener('blur', () => {
+                            if (state.editingId === todo.id) commitEditTodo(todo.id, input.value);
+                        });
+                    }
+                    if (saveBtn) saveBtn.addEventListener('click', () => commitEditTodo(todo.id, input.value));
+                    if (cancelBtn) cancelBtn.addEventListener('mousedown', (ev) => ev.preventDefault());
+                    if (cancelBtn) cancelBtn.addEventListener('click', () => cancelEditTodo());
+                }
             });
+            renderProgressPanel();
         }
 
         function gainXp(amount) {
@@ -525,6 +1746,7 @@
             dom.xpText.innerText = `${state.xp}/${XP_LIMIT}`;
             const rank = RANKS[Math.min(state.level-1, RANKS.length-1)];
             dom.levelDisplay.innerText = `Lv.${state.level} ${rank}`;
+            renderProgressPanel();
         }
 
         async function save() {
